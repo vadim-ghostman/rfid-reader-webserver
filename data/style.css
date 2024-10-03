@@ -26,7 +26,7 @@ table {
 }
 
 #timeTable {
-    width: 500px;
+    width: calc(40px + 260px + 190px);
 }
 
 .button {
@@ -34,7 +34,7 @@ table {
     border: 1px solid #161616;
     height: 30px;
     border-radius: 5px;
-    width: 100px;
+    width: 140px;
     margin-top: 10px;
     color: chocolate;
 }
@@ -58,8 +58,6 @@ tr {
     display: flex;
     /* justify-content: center; */
     align-items: center;
-    height: 500px;
-    flex-wrap: wrap;
     flex-direction: column;
     gap: 5px;
     margin-top: 20px;

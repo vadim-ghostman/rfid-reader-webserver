@@ -13,13 +13,11 @@ function initWebSocket() {
 function onOpen(event) {
     console.log('Connection opened');
     document.getElementsByTagName("h1")[0].style.background = "aqua";
-    // document.getElementById("status").innerHTML = `<span style="color: aqua;">connected</span>`;
 }
 
 function onClose(event) {
     console.log('Connection closed');
     document.getElementsByTagName("h1")[0].style.background = "orange";
-    // document.getElementById("status").innerHTML = `<span style="color: orange;">closed connection</span>`;
     setTimeout(initWebSocket, 2000);
 }
 
@@ -64,9 +62,9 @@ function onMessage(event) {
 
         document.getElementById("timeTable").innerHTML = `
         <tr>
-            <th style="width: 50px;">№</th>
-            <th style="width: 260px;">Name</th>
-            <th style="width: 190px;">Time</th>
+            <th style="width: 40px;">№</th>
+            <th style="width: 240px;">Name</th>
+            <th style="width: 180px;">Time</th>
         </tr>`;
         
         for (let i = 1; i < data.length; i++) {

@@ -1,18 +1,14 @@
 #include <Arduino.h>
-#include <esp_now.h>
-#include <WiFi.h>
-#include "time.h"
-
 #include <Wire.h>
+#include <WiFi.h>
+// #include <esp_now.h>
 #include <Adafruit_PN532.h>
-
 #include <SPI.h>
 #include <Preferences.h>
-#include "SPIFFS.h"
-
 #include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
-// #include <ESPAsyncTCP.h>
+#include "time.h"
+#include "SPIFFS.h"
 
 #define PN532_SCK  (19)
 #define PN532_MOSI (23)
@@ -34,12 +30,9 @@ const char* ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 3600;
 const int daylightOffset_sec = 3600;
 
-// Replace with your network credentials
 char* ssid = "my_little_network";
 const char* password = "q6t4xat2";
 
-// HTML content for the web server
-String index_html = "";
 int index_to_write_in_tt = -1;
 
 AsyncWebServer server(80);
@@ -151,7 +144,6 @@ String get_time(){
     String month = timeinfo.tm_mon + 1 < 10 ? "0" + String(timeinfo.tm_mon + 1) : String(timeinfo.tm_mon + 1);
     String year = String(timeinfo.tm_year + 1900);
 
-    // TODO: fix one digit time in seconds, hours and minutes
     return day + "." + month + "." + year + " " + hours + ":" + minutes + ":" + seconds;
 }
 
@@ -186,14 +178,11 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
             Serial.println("Database cleared");
             return;
         } else if (strcmp((char*)data, "TEST") == 0) {
-            // delay(3000);
-            // ws.textAll("REQUEST_NAME");
             prefs.begin("database");
             Serial.printf("Free entries: %u\n", prefs.freeEntries());
             prefs.end();
             return;
         } else if (strcmp((char*)data, "RELOAD_TABLE") == 0) {
-            // TABLE_DATA::name1|code1::name2|code2::name3|code3
             String sendData = get_records_from_db();
             ws.textAll(sendData);
             return;
@@ -311,13 +300,6 @@ bool is_code_in_database(const char* code) {
 	prefs.end();
 	return name.length() > 0;
 }
-
-// bool is_number_in_database(String number) {
-// 	prefs.begin("database");
-// 	String code = prefs.getString(number.c_str());
-// 	prefs.end();
-// 	return code.length() > 0;
-// }
 
 String find_name(const char* code) {
 	prefs.begin("database");
