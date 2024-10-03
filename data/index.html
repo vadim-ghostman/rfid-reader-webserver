@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="UTF-8">
+	    <title>ESP32 WebSocket</title>
+	    <script src="/main.js"></script>
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body>
+        <h1>webserver</h1>
+        <div class="flex">
+            <p>last scanned person:</p>
+            <p style="display: block;"><span id="lastName">---</span></p>
+            <input type="text" id="nameInput" placeholder="enter new name..." style="display: none;">
+            <p>last scanned time:</p>
+            <p><span id="lastTime">---</span></p>
+            <!-- <p>status: <span id="status"><span style="color: orange;">disconnected</span></span></p> -->
+            <table id="databaseTable" style="display: none;"></table>
+            <button class="button" id="loadButton" onclick="loadTable()" style="display: block;">show users</button>
+            <button class="button" id="reloadButton" onclick="reloadTable()" style="display: none;">reload users</button>
+            <table id="timeTable" style="display: none;"></table>
+            <button class="button" id="loadTTButton" onclick="loadTimetable()" style="display: block;">show timetable</button>
+            <button class="button" id="reloadTTButton" onclick="reloadTimetable()" style="display: none;">reload timetable</button>
+        </div>
+    </body>
+</html>

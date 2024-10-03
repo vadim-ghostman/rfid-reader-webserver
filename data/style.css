@@ -1,0 +1,78 @@
+* {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    color: whitesmoke;
+}
+
+body { background: #272727; }
+.colISIC { opacity: 0.5; }
+.colName { color: rosybrown; }
+.colNumber { opacity: 0.5; }
+.colTime { color: goldenrod; }
+th { text-align: left; }
+tr:hover { background: #3a3a3a; }
+#lastName { color: royalblue; }
+#lastTime { color: greenyellow; }
+
+table {
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#databaseTable {
+    width: 440px;
+}
+
+#timeTable {
+    width: 500px;
+}
+
+.button {
+    background: #303030;
+    border: 1px solid #161616;
+    height: 30px;
+    border-radius: 5px;
+    width: 100px;
+    margin-top: 10px;
+    color: chocolate;
+}
+
+tr {
+    height: 30px;
+    border-bottom: 1px solid #464646;
+    width: 100%;
+}
+
+#nameInput {
+    text-align: center;
+    background: #303030;
+    border: 1px solid #161616;
+    height: 30px;
+    border-radius: 5px;
+    width: 220px;
+}
+
+.flex {
+    display: flex;
+    /* justify-content: center; */
+    align-items: center;
+    height: 500px;
+    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+h1 {
+    color: black;
+    text-align: center;
+    width: 100%;
+    background: orange;
+    height: 60px;
+    margin: 0;
+    padding: 0;
+    padding-top: 10px;
+}
