@@ -6,7 +6,7 @@
     color: whitesmoke;
 }
 
-body { background: #272727; }
+body { background: #272727; height: 100%; }
 .colISIC { opacity: 0.5; }
 .colName { color: rosybrown; }
 .colNumber { opacity: 0.5; }
@@ -16,32 +16,74 @@ th { text-align: left; }
 #lastName { color: royalblue; }
 #lastTime { color: greenyellow; }
 
+html {
+    height: calc(100% - 60px - 20px); /* 100% - (header) - (margin-top of .flex)*/
+}
+
 table {
     border-collapse: collapse;
     margin-top: 20px;
 }
 
 #databaseTable {
-    width: 440px;
+    width: 90%;
 }
 
 #timeTable {
-    width: calc(40px + 260px + 190px);
+    width: 90%;
+}
+
+tbody {
+    width: 100%;
 }
 
 .button {
     background: #303030;
     border: 1px solid #161616;
     height: 30px;
+    min-height: 30px;
     border-radius: 5px;
-    width: 140px;
+    width: 130px;
     margin-top: 10px;
     color: chocolate;
+}
+
+.log-message {
+    font-size: 12px;
+    opacity: 0;
+}
+
+.box {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.box-row {
+    margin-top: 10px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 50px;
 }
 
 tr {
     height: 30px;
     border-bottom: 1px solid #464646;
+    /* width: 100%; */
+}
+
+footer {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    flex-grow: 2;
+    padding-bottom: 10px;
     width: 100%;
 }
 
@@ -62,6 +104,7 @@ tr {
     gap: 5px;
     margin-top: 20px;
     width: 100%;
+    height: 100%;
 }
 
 h1 {

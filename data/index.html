@@ -3,82 +3,35 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta charset="UTF-8">
-	    <title>ESP32 WebSocket</title>
+	    <title>webserver</title>
 	    <script src="./main.js"></script>
         <link rel="stylesheet" href="./style.css">
     </head>
     <body>
         <h1>webserver</h1>
         <div class="flex">
-            <p>last scanned person:</p>
+            <p>current scanning person:</p>
             <p style="display: block;"><span id="lastName">---</span></p>
             <input type="text" id="nameInput" placeholder="enter new name..." style="display: none;">
-            <p>last scanned time:</p>
+            <p>current scanning time:</p>
             <p><span id="lastTime">---</span></p>
             <!-- <p>status: <span id="status"><span style="color: orange;">disconnected</span></span></p> -->
             <table id="databaseTable" style="display: none;"></table>
             <button class="button" id="loadButton" onclick="loadTable()" style="display: block;">show users</button>
             <button class="button" id="reloadButton" onclick="reloadTable()" style="display: none;">reload users</button>
-            <table id="timeTable" style="display: none;">
-                <tr>
-                    <th style="width: 10%;">№</th>
-                    <th style="width: 60%;">Name</th>
-                    <th style="width: 30%;">Time</th>
-                </tr>
-                <tr>
-                    <td class="colNumber">10</td>
-                    <td class="colName">Vadym Tovtyn</td>
-                    <td class="colTime">03.10.2024 02:20:12</td>
-                </tr>
-                <tr>
-                    <td class="colNumber">10</td>
-                    <td class="colName">Vadym Tovtyn</td>
-                    <td class="colTime">03.10.2024 02:20:12</td>
-                </tr>
-                <tr>
-                    <td class="colNumber">10</td>
-                    <td class="colName">Vadym Tovtyn</td>
-                    <td class="colTime">03.10.2024 02:20:12</td>
-                </tr>
-                <tr>
-                    <td class="colNumber">10</td>
-                    <td class="colName">Vadym Tovtyn</td>
-                    <td class="colTime">03.10.2024 02:20:12</td>
-                </tr>
-                <tr>
-                    <td class="colNumber">10</td>
-                    <td class="colName">Vadym Tovtyn</td>
-                    <td class="colTime">03.10.2024 02:20:12</td>
-                </tr>
-                <tr>
-                    <td class="colNumber">10</td>
-                    <td class="colName">Vadym Tovtyn</td>
-                    <td class="colTime">03.10.2024 02:20:12</td>
-                </tr>
-                <tr>
-                    <td class="colNumber">10</td>
-                    <td class="colName">Vadym Tovtyn</td>
-                    <td class="colTime">03.10.2024 02:20:12</td>
-                </tr>
-                <tr>
-                    <td class="colNumber">10</td>
-                    <td class="colName">Vadym Tovtyn</td>
-                    <td class="colTime">03.10.2024 02:20:12</td>
-                </tr>
-                <tr>
-                    <td class="colNumber">10</td>
-                    <td class="colName">Vadym Tovtyn</td>
-                    <td class="colTime">03.10.2024 02:20:12</td>
-                </tr>
-                <tr>
-                    <td class="colNumber">10</td>
-                    <td class="colName">Vadym Tovtyn</td>
-                    <td class="colTime">03.10.2024 02:20:12</td>
-                </tr>
-            </table>
-            <button class="button" id="loadTTButton" onclick="loadTimetable()" style="display: block;">show timetable</button>
-            <button class="button" id="reloadTTButton" onclick="reloadTimetable()" style="display: none;">reload timetable</button>
-            <button class="button" id="clearTTButton" onclick="clearTimetable()" style="display: none;">clear timetable</button>
+            <table id="timeTable" style="display: none;"></table>
+            <div class="box-row">
+                <button class="button" id="loadTTButton" onclick="loadTimetable()" style="display: block;">show timetable</button>
+                <button class="button" id="clearTTButton" onclick="clearTimetable()" style="display: none; color: orangered;">clear timetable</button>
+                <button class="button" id="reloadTTButton" onclick="reloadTimetable()" style="display: none;">reload timetable</button>
+                <div id="saveTTBox" style="display: none;" class="box">
+                    <button class="button" id="clearTTButton" onclick="saveTimetable()">save timetable</button>
+                    <p id="save-timetable-message" class="log-message">log message</p>
+                </div>
+            </div>
+            <footer>
+                <p style="opacity: 0.3; font-size: 14px;">made by <a style="color: aqua; text-decoration: none;" href="https://github.com/vadim-ghostman/rfid-reader-webserver">imghostman</a></p>
+            </footer>
         </div>
     </body>
 </html>

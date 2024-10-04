@@ -1,23 +1,31 @@
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
 window.addEventListener('load', onLoad);
+let timetable_data = [];
 
 function initWebSocket() {
-    console.log('Trying to open a WebSocket connection...');
+    console.log('opening websocket connnection...');
     websocket = new WebSocket(gateway);
     websocket.onopen    = onOpen;
     websocket.onclose   = onClose;
     websocket.onmessage = onMessage;
+    websocket.onerror   = onError;
 }
 
 function onOpen(event) {
-    console.log('Connection opened');
+    console.log('connection opened');
     document.getElementsByTagName("h1")[0].style.background = "aqua";
 }
 
 function onClose(event) {
-    console.log('Connection closed');
+    console.log('connection closed');
     document.getElementsByTagName("h1")[0].style.background = "orange";
+    setTimeout(initWebSocket, 2000);
+}
+
+function onError(error) {
+    console.log('error');
+    document.getElementsByTagName("h1")[0].style.background = "red";
     setTimeout(initWebSocket, 2000);
 }
 
@@ -42,8 +50,8 @@ function onMessage(event) {
         document.getElementById("databaseTable").innerHTML = `
         <tr>
             <th style="width: 10%;">№</th>
-            <th style="width: 60%;">Name</th>
-            <th style="width: 30%;">ISIC</th>
+            <th style="width: 50%;">Name</th>
+            <th style="width: 40%;">ISIC</th>
         </tr>`;
         
         for (let i = 1; i < data.length; i++) {
@@ -59,12 +67,13 @@ function onMessage(event) {
         // TIMETABLE_DATA::name1|time1::name2|time2::name3|time3
 
         let data = event.data.split("::");
+        timetable_data = data;
 
         document.getElementById("timeTable").innerHTML = `
         <tr>
             <th style="width: 10%;">№</th>
-            <th style="width: 60%;">Name</th>
-            <th style="width: 30%;">Time</th>
+            <th style="width: 50%;">Name</th>
+            <th style="width: 40%;">Time</th>
         </tr>`;
         
         for (let i = 1; i < data.length; i++) {
@@ -87,7 +96,7 @@ function onMessage(event) {
 
 function loadTable() {
     websocket.send("RELOAD_TABLE");
-    document.getElementById("databaseTable").style.display = "block";
+    document.getElementById("databaseTable").style.display = "table";
     document.getElementById("reloadButton").style.display = "block";
     document.getElementById("loadButton").style.display = "none";
 }
@@ -98,9 +107,10 @@ function reloadTable() {
 
 function loadTimetable() {
     websocket.send("RELOAD_TIMETABLE");
-    document.getElementById("timeTable").style.display = "block";
+    document.getElementById("timeTable").style.display = "table";
     document.getElementById("reloadTTButton").style.display = "block";
     document.getElementById("clearTTButton").style.display = "block";
+    document.getElementById("saveTTBox").style.display = "flex";
     document.getElementById("loadTTButton").style.display = "none";
 }
 
@@ -126,4 +136,27 @@ function onLoad(event) {
             }
         });
     }
+}
+
+function saveTimetable() {
+    let res = download_as_csv();
+    let mesElement = document.getElementById("save-timetable-message");
+    mesElement.style.color = res.startsWith("ERR") ? "red" : "green";
+    mesElement.innerHTML = res.split(":")[1];
+    mesElement.style.opacity = 1;
+}
+
+function download_as_csv() {
+    if (timetable_data.length == 0) return "ERR:timetable not loaded";
+    let text = "num,name,time\n";
+    for (let i = 1; i < timetable_data.length; i++)
+        text += `1,${timetable_data.split("|")[0]},${timetable_data.split("|")[1]}\n`;
+
+    let a = document.createElement('a');
+    
+    a.href = 'data:attachment/text,' + encodeURI(text);
+    a.target = '_blank';
+    a.download = 'myFile.txt';
+    a.click();
+    return "OK:successfully saved";
 }
