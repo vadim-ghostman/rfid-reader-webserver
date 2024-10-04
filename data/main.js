@@ -150,13 +150,15 @@ function download_as_csv() {
     if (timetable_data.length == 0) return "ERR:timetable not loaded";
     let text = "num,name,time\n";
     for (let i = 1; i < timetable_data.length; i++)
-        text += `1,${timetable_data.split("|")[0]},${timetable_data.split("|")[1]}\n`;
+        text += `${i},${timetable_data[i].split("|")[0]},${timetable_data[i].split("|")[1]}\n`;
 
     let a = document.createElement('a');
     
+    const date = new Date();
+    const pad = (num, totalLength) => String(num).padStart(totalLength, '0');
     a.href = 'data:attachment/text,' + encodeURI(text);
     a.target = '_blank';
-    a.download = 'myFile.txt';
+    a.download = `timetable-${pad(date.getDate(), 2)}${pad(date.getMonth() + 1, 2)}${date.getFullYear()}.csv`;
     a.click();
     return "OK:successfully saved";
 }
