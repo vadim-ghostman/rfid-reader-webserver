@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <WiFi.h>
-// #include <esp_now.h>
 #include <Adafruit_PN532.h>
 #include <SPI.h>
 #include <Preferences.h>
@@ -306,6 +305,10 @@ void setup() {
 	Serial.begin(9600);
 	Serial.println("\nESP starting...");
 
+	pinMode(BUZZER, OUTPUT);
+	pinMode(LED_RED, OUTPUT);
+	pinMode(LED_BLUE, OUTPUT);
+
     Serial.print("setting AP");
     WiFi.softAP(ssid, password);
 
@@ -362,10 +365,6 @@ void setup() {
 	// Start server
 	server.begin();
 
-	pinMode(BUZZER, OUTPUT);
-	pinMode(LED_RED, OUTPUT);
-	pinMode(LED_BLUE, OUTPUT);
-
 	nfc.begin();
 
 	uint32_t versiondata = nfc.getFirmwareVersion();
@@ -411,19 +410,17 @@ String find_name_by_number(String number) {
 }
 
 void play_success() {
-	analogWrite(BUZZER, 120);
 	digitalWrite(LED_BLUE, HIGH);
-	delay(500);
+    tone(BUZZER, 750, 250);
+    delay(50);
+    tone(BUZZER, 950, 250);
 	digitalWrite(LED_BLUE, LOW);
-	analogWrite(BUZZER, 0);
 }
 
 void play_error() {
-	analogWrite(BUZZER, 230);
 	digitalWrite(LED_RED, HIGH);
-	delay(700);
+    tone(BUZZER, 230, 600);
 	digitalWrite(LED_RED, LOW);
-	analogWrite(BUZZER, 0);
 }
  
 void loop() {
