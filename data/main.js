@@ -62,9 +62,9 @@ function onMessage(event) {
 
         document.getElementById("timeTable").innerHTML = `
         <tr>
-            <th style="width: 40px;">№</th>
-            <th style="width: 240px;">Name</th>
-            <th style="width: 180px;">Time</th>
+            <th style="width: 10%;">№</th>
+            <th style="width: 60%;">Name</th>
+            <th style="width: 30%;">Time</th>
         </tr>`;
         
         for (let i = 1; i < data.length; i++) {
@@ -100,6 +100,7 @@ function loadTimetable() {
     websocket.send("RELOAD_TIMETABLE");
     document.getElementById("timeTable").style.display = "block";
     document.getElementById("reloadTTButton").style.display = "block";
+    document.getElementById("clearTTButton").style.display = "block";
     document.getElementById("loadTTButton").style.display = "none";
 }
 
@@ -107,6 +108,22 @@ function reloadTimetable() {
     websocket.send("RELOAD_TIMETABLE");
 }
 
+function clearTimetable() {
+    websocket.send("CLEAR_TIMETABLE");
+    reloadTimetable();
+}
+
 function onLoad(event) {
     initWebSocket();
+    let trs = document.getElementsByTagName("tr");
+    for (let i = 0; i < trs.length; i++) {
+        trs[i].addEventListener("click", function(event) {
+            if (event.currentTarget.className == "selected") {
+                event.currentTarget.className = "";
+                return;
+            } else {
+                event.currentTarget.className = "selected";
+            }
+        });
+    }
 }

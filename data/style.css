@@ -12,7 +12,7 @@ body { background: #272727; }
 .colNumber { opacity: 0.5; }
 .colTime { color: goldenrod; }
 th { text-align: left; }
-tr:hover { background: #3a3a3a; }
+.selected { background: #3a3a3a; }
 #lastName { color: royalblue; }
 #lastTime { color: greenyellow; }
 

@@ -4,8 +4,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta charset="UTF-8">
 	    <title>ESP32 WebSocket</title>
-	    <script src="/main.js"></script>
-        <link rel="stylesheet" href="/style.css">
+	    <script src="./main.js"></script>
+        <link rel="stylesheet" href="./style.css">
     </head>
     <body>
         <h1>webserver</h1>
@@ -19,9 +19,66 @@
             <table id="databaseTable" style="display: none;"></table>
             <button class="button" id="loadButton" onclick="loadTable()" style="display: block;">show users</button>
             <button class="button" id="reloadButton" onclick="reloadTable()" style="display: none;">reload users</button>
-            <table id="timeTable" style="display: none;"></table>
+            <table id="timeTable" style="display: none;">
+                <tr>
+                    <th style="width: 10%;">№</th>
+                    <th style="width: 60%;">Name</th>
+                    <th style="width: 30%;">Time</th>
+                </tr>
+                <tr>
+                    <td class="colNumber">10</td>
+                    <td class="colName">Vadym Tovtyn</td>
+                    <td class="colTime">03.10.2024 02:20:12</td>
+                </tr>
+                <tr>
+                    <td class="colNumber">10</td>
+                    <td class="colName">Vadym Tovtyn</td>
+                    <td class="colTime">03.10.2024 02:20:12</td>
+                </tr>
+                <tr>
+                    <td class="colNumber">10</td>
+                    <td class="colName">Vadym Tovtyn</td>
+                    <td class="colTime">03.10.2024 02:20:12</td>
+                </tr>
+                <tr>
+                    <td class="colNumber">10</td>
+                    <td class="colName">Vadym Tovtyn</td>
+                    <td class="colTime">03.10.2024 02:20:12</td>
+                </tr>
+                <tr>
+                    <td class="colNumber">10</td>
+                    <td class="colName">Vadym Tovtyn</td>
+                    <td class="colTime">03.10.2024 02:20:12</td>
+                </tr>
+                <tr>
+                    <td class="colNumber">10</td>
+                    <td class="colName">Vadym Tovtyn</td>
+                    <td class="colTime">03.10.2024 02:20:12</td>
+                </tr>
+                <tr>
+                    <td class="colNumber">10</td>
+                    <td class="colName">Vadym Tovtyn</td>
+                    <td class="colTime">03.10.2024 02:20:12</td>
+                </tr>
+                <tr>
+                    <td class="colNumber">10</td>
+                    <td class="colName">Vadym Tovtyn</td>
+                    <td class="colTime">03.10.2024 02:20:12</td>
+                </tr>
+                <tr>
+                    <td class="colNumber">10</td>
+                    <td class="colName">Vadym Tovtyn</td>
+                    <td class="colTime">03.10.2024 02:20:12</td>
+                </tr>
+                <tr>
+                    <td class="colNumber">10</td>
+                    <td class="colName">Vadym Tovtyn</td>
+                    <td class="colTime">03.10.2024 02:20:12</td>
+                </tr>
+            </table>
             <button class="button" id="loadTTButton" onclick="loadTimetable()" style="display: block;">show timetable</button>
             <button class="button" id="reloadTTButton" onclick="reloadTimetable()" style="display: none;">reload timetable</button>
+            <button class="button" id="clearTTButton" onclick="clearTimetable()" style="display: none;">clear timetable</button>
         </div>
     </body>
 </html>

@@ -5,6 +5,7 @@
 #include <Adafruit_PN532.h>
 #include <SPI.h>
 #include <Preferences.h>
+#include <DNSServer.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
 #include "time.h"
@@ -38,9 +39,67 @@ int index_to_write_in_tt = -1;
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
+DNSServer dnsServer;
+
 String lastName = "----";
 String lastCode = "";
 String lastTime = "";
+
+bool time_received = false;
+
+const char index_html[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html>
+    <head>
+        <title>ESP32 AP</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script>
+            function sendTime() {
+                const pad = (num, totalLength) => String(num).padStart(totalLength, '0');
+                const date = new Date();
+                const formattedDate = `${pad(date.getDate(), 2)}.${pad(date.getMonth() + 1, 2)}.${date.getFullYear()} ${pad(date.getHours(), 2)}:${pad(date.getMinutes(), 2)}:${pad(date.getSeconds(), 2)}`;
+                document.getElementById("timeInput").value = formattedDate;
+                document.getElementById("formSend").submit();
+            }
+        </script>
+        <style>
+            button {
+                background: #303030;
+                border: 1px solid #161616;
+                height: 30px;
+                border-radius: 5px;
+                width: 140px;
+                margin-top: 10px;
+                color: chocolate;
+            }
+            * { font-family: sans-serif; }
+            h3 { width: 100%; text-align: center; color: whitesmoke; margin-bottom: 10px;}
+            body { background: #272727; display: flex; align-items: center; flex-direction: column; gap: 30px;}
+        </style>
+    </head>
+    <body>
+        <h3>starting page</h3>
+        <button onclick="sendTime()">send time</button>
+        <form id="formSend" action="/get" style="display: none;">
+            <input type="text" id="timeInput" name="time">
+            <input type="submit" value="submit">
+        </form>
+    </body>
+</html>)rawliteral";
+
+class CaptiveRequestHandler : public AsyncWebHandler {
+public:
+  CaptiveRequestHandler() {}
+  virtual ~CaptiveRequestHandler() {}
+
+  bool canHandle(AsyncWebServerRequest *request){
+    //request->addInterestingHeader("ANY");
+    return true;
+  }
+
+  void handleRequest(AsyncWebServerRequest *request) {
+    request->send_P(200, "text/html", index_html); 
+  }
+};
 
 int get_first_free_from_tt() {
     prefs.begin("timetable");
@@ -189,11 +248,16 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         } else if (strcmp((char*)data, "RELOAD_TIMETABLE") == 0) {
             String sendData = get_records_from_tt();
             ws.textAll(sendData);
+            return;
+        } else if (strcmp((char*)data, "CLEAR_TIMETABLE") == 0) {
+            clear_tt();
+            return;
         } else {
             lastName = (char*)data;
             String number = get_first_free_from_db();
             if (!is_user_in_db(lastCode))
                 add_to_db_by_number(number, lastCode.c_str(), lastName);
+            return;
         }
     }
     return;
@@ -222,30 +286,34 @@ void initWebSocket() {
     server.addHandler(&ws);
 }
 
+void setTime(int yr, int month, int mday, int hr, int minute, int sec){
+    struct tm tm;
+
+    tm.tm_year = yr - 1900;   // Set date
+    tm.tm_mon = month-1;
+    tm.tm_mday = mday;
+    tm.tm_hour = hr;      // Set time
+    tm.tm_min = minute;
+    tm.tm_sec = sec;
+    tm.tm_isdst = 0;  // 1 or 0
+    time_t t = mktime(&tm);
+    Serial.printf("Setting time: %s", asctime(&tm));
+    struct timeval now = { .tv_sec = t };
+    settimeofday(&now, NULL);
+}
+
 void setup() {
 	Serial.begin(9600);
-	Serial.println("Connecting...");
+	Serial.println("\nESP starting...");
 
-	// Connect to Wi-Fi
-	WiFi.begin(ssid, password);
-	while (WiFi.status() != WL_CONNECTED) {
-		delay(1000);
-		Serial.println("Connecting to WiFi...");
-	}
-	Serial.println("Connected to WiFi");
+    Serial.print("setting AP");
+    WiFi.softAP(ssid, password);
 
-    if(!SPIFFS.begin(true)){
-        Serial.println("An Error has occurred while mounting SPIFFS");
-        return;
-    }
+    IPAddress IP = WiFi.softAPIP();
+    Serial.print("AP IP address: ");
+    Serial.println(IP);
 
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-    String t = get_time();
-    while (t == "Failed to obtain time") {
-        delay(500);
-        configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-        t = get_time();
-    }
+    if(!SPIFFS.begin(true)) { Serial.println("bad mounting SPIFFS"); return; }
 
 	Serial.print("ESP32 IP Address: ");
 	Serial.println(WiFi.localIP());
@@ -254,7 +322,13 @@ void setup() {
 
 	// Serve the HTML page
 	server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(SPIFFS, "/index.html", "text/html");
+        if (!time_received) {
+            request->send_P(200, "text/html", index_html);
+            Serial.println("client connected :)");
+        } else {
+            request->send(SPIFFS, "/index.html", "text/html");
+            Serial.println("sent page to client");
+        }
 	});
 
 	server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -265,6 +339,26 @@ void setup() {
         request->send(SPIFFS, "/main.js", "text/js");
 	});
 
+    server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        if (request->hasParam("time")) {
+            String inputMessage = request->getParam("time")->value();
+            Serial.printf("time get: %s", inputMessage);
+            // 04.10.2024 11:58:30
+            int yr = 0, month, mday, hr, minute, sec;
+            sscanf(inputMessage.c_str(), "%02d.%02d.%04d %02d:%02d:%02d", &mday, &month, &yr, &hr, &minute, &sec);
+            if (yr != 0) {
+                setTime(yr, month, mday, hr, minute, sec);
+                time_received = true;
+            } else
+                Serial.println("no time given!");
+        }
+        request->send(SPIFFS, "/index.html", "text/html");
+    });
+
+    Serial.printf("time after setting: %s\n", get_time());
+
+    dnsServer.start(53, "*", WiFi.softAPIP());
+    server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
 	// Start server
 	server.begin();
 
@@ -278,8 +372,8 @@ void setup() {
 	if (!versiondata) {
 		Serial.print("Didn't find PN53x board");
         ESP.restart();
-		while (1); // halt
 	}
+
 
     update_tt_index();
 	Serial.println("Waiting for an ISIC card ...");
@@ -336,7 +430,7 @@ void loop() {
 	uint8_t success;
 	uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };
 	uint8_t uidLength;
-
+    dnsServer.processNextRequest();
     ws.cleanupClients();
 	success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength);
 
