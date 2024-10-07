@@ -17,7 +17,8 @@
 
 #define BUZZER     (5)
 #define LED_RED    (17)
-#define LED_BLUE   (15)
+#define LED_GREEN  (16)
+#define LED_BLUE   (4)
 
 #define MAX_TT_RECORDS 60
 #define MAX_DB_RECORDS 50
@@ -45,6 +46,7 @@ String lastCode = "";
 String lastTime = "";
 
 bool time_received = false;
+bool requestName = true;
 
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
@@ -256,6 +258,9 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
             String number = get_first_free_from_db();
             if (!is_user_in_db(lastCode))
                 add_to_db_by_number(number, lastCode.c_str(), lastName);
+            bool requestName = false;
+            digitalWrite(LED_RED, LOW);
+            digitalWrite(LED_GREEN, LOW);
             return;
         }
     }
@@ -307,7 +312,11 @@ void setup() {
 
 	pinMode(BUZZER, OUTPUT);
 	pinMode(LED_RED, OUTPUT);
+	pinMode(LED_GREEN, OUTPUT);
 	pinMode(LED_BLUE, OUTPUT);
+
+    digitalWrite(LED_RED, HIGH);
+    digitalWrite(LED_BLUE, HIGH);
 
     Serial.print("setting AP");
     WiFi.softAP(ssid, password);
@@ -343,6 +352,7 @@ void setup() {
 	});
 
     server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
+        if (time_received) request->redirect("/");
         if (request->hasParam("time")) {
             String inputMessage = request->getParam("time")->value();
             Serial.printf("time get: %s", inputMessage);
@@ -352,10 +362,12 @@ void setup() {
             if (yr != 0) {
                 setTime(yr, month, mday, hr, minute, sec);
                 time_received = true;
+                digitalWrite(LED_BLUE, LOW);
             } else
                 Serial.println("no time given!");
         }
-        request->send(SPIFFS, "/index.html", "text/html");
+        request->redirect("/");
+        // request->send(SPIFFS, "/index.html", "text/html");
     });
 
     Serial.printf("time after setting: %s\n", get_time());
@@ -373,9 +385,9 @@ void setup() {
         ESP.restart();
 	}
 
-
     update_tt_index();
 	Serial.println("Waiting for an ISIC card ...");
+    digitalWrite(LED_RED, LOW);
 }
 
 
@@ -410,17 +422,15 @@ String find_name_by_number(String number) {
 }
 
 void play_success() {
-	digitalWrite(LED_BLUE, HIGH);
-    tone(BUZZER, 750, 250);
-    delay(50);
-    tone(BUZZER, 950, 250);
-	digitalWrite(LED_BLUE, LOW);
+	digitalWrite(LED_GREEN, HIGH);
+    tone(BUZZER, 750, 200);
+    delay(150);
+    tone(BUZZER, 750, 200);
 }
 
 void play_error() {
 	digitalWrite(LED_RED, HIGH);
     tone(BUZZER, 230, 600);
-	digitalWrite(LED_RED, LOW);
 }
  
 void loop() {
@@ -439,6 +449,9 @@ void loop() {
 		const char* code = code_string.c_str();
 		Serial.printf("ISIC: %s %s\n", code, is_code_in_database(code) ? "" : "(unknown)");
 		if (is_code_in_database(code)) {
+            requestName = false;
+            digitalWrite(LED_GREEN, LOW);
+            digitalWrite(LED_RED, LOW);
 			play_success();
 			String name = find_name(code);
             write_time_to_tt(name);
@@ -451,9 +464,17 @@ void loop() {
             lastName = "REQUEST_NAME";
             lastCode = code;
             Serial.printf("Please enter your name for code %s\n", code);
+            requestName = true;
+            digitalWrite(LED_GREEN, HIGH);
+            digitalWrite(LED_RED, HIGH);
 		}
         nfc.readDetectedPassiveTargetID(uid, &uidLength);
         delay(1000);
+        if (!requestName) {
+            digitalWrite(LED_GREEN, LOW);
+            digitalWrite(LED_RED, LOW);
+        }
+	    // digitalWrite(LED_GREEN, LOW);
 	} else {
         Serial.println("error");
     }
