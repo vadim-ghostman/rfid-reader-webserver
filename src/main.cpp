@@ -102,6 +102,21 @@ public:
   }
 };
 
+void set_lights(int r, int g, int b) {
+    if (r >= 0)
+        digitalWrite(LED_RED, r);
+    if (g >= 0)
+        digitalWrite(LED_GREEN, g);
+    if (b >= 0)
+        digitalWrite(LED_BLUE, b);
+}
+
+void off_lights() {
+    digitalWrite(LED_RED, LOW);
+    digitalWrite(LED_GREEN, LOW);
+    digitalWrite(LED_BLUE, LOW);
+}
+
 int get_first_free_from_tt() {
     prefs.begin("timetable");
     for (int i = 0; i < MAX_TT_RECORDS; i++) {
@@ -315,8 +330,7 @@ void setup() {
 	pinMode(LED_GREEN, OUTPUT);
 	pinMode(LED_BLUE, OUTPUT);
 
-    digitalWrite(LED_RED, HIGH);
-    digitalWrite(LED_BLUE, HIGH);
+    set_lights(1, -1, 1); // red and blue
 
     Serial.print("setting AP");
     WiFi.softAP(ssid, password);
@@ -387,7 +401,7 @@ void setup() {
 
     update_tt_index();
 	Serial.println("Waiting for an ISIC card ...");
-    digitalWrite(LED_RED, LOW);
+    set_lights(0, 0, 1); // blue
 }
 
 
@@ -422,14 +436,14 @@ String find_name_by_number(String number) {
 }
 
 void play_success() {
-	digitalWrite(LED_GREEN, HIGH);
+	set_lights(0, 1, 0);
     tone(BUZZER, 750, 200);
     delay(150);
     tone(BUZZER, 750, 200);
 }
 
 void play_error() {
-	digitalWrite(LED_RED, HIGH);
+	set_lights(1, 0, 0);
     tone(BUZZER, 230, 600);
 }
  
@@ -450,8 +464,6 @@ void loop() {
 		Serial.printf("ISIC: %s %s\n", code, is_code_in_database(code) ? "" : "(unknown)");
 		if (is_code_in_database(code)) {
             requestName = false;
-            digitalWrite(LED_GREEN, LOW);
-            digitalWrite(LED_RED, LOW);
 			play_success();
 			String name = find_name(code);
             write_time_to_tt(name);
@@ -465,15 +477,11 @@ void loop() {
             lastCode = code;
             Serial.printf("Please enter your name for code %s\n", code);
             requestName = true;
-            digitalWrite(LED_GREEN, HIGH);
-            digitalWrite(LED_RED, HIGH);
 		}
         nfc.readDetectedPassiveTargetID(uid, &uidLength);
         delay(1000);
-        if (!requestName) {
-            digitalWrite(LED_GREEN, LOW);
-            digitalWrite(LED_RED, LOW);
-        }
+        if (!requestName) set_lights(0, 0, -1);
+        else set_lights(1, 1, -1);
 	    // digitalWrite(LED_GREEN, LOW);
 	} else {
         Serial.println("error");

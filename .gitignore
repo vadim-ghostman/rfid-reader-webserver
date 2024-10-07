@@ -32,5 +32,5 @@
 *.app
 
 # Debug files
-.pio
-.vscode
+.pio/*
+.vscode/*
